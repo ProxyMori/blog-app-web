@@ -1,5 +1,5 @@
 import axios from "axios";
 
 export const axiosInstance = axios.create({
-  baseURL: "https://finekittens-us.backendless.app/api",
+  baseURL: "VITE_BASE_URL_API",
 });
