@@ -10,13 +10,13 @@ import {
 } from "@/components/ui/pagination";
 import { axiosInstance } from "@/lib/axios";
 import useAuth from "@/stores/useAuth";
-import type { Blog } from "@/types/Blog";
 import type { PaginationResponse } from "@/types/pagination";
+import type { Post } from "@/types/post";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 function HomePage() {
-  const [blogs, setBlogs] = useState<PaginationResponse<Blog> | null>(null);
+  const [blogs, setBlogs] = useState<PaginationResponse<Post> | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [page, setPage] = useState(1);
 
@@ -24,7 +24,7 @@ function HomePage() {
 
   const getBlogs = async () => {
     try {
-      const { data } = await axiosInstance.get<PaginationResponse<Blog>>(
+      const { data } = await axiosInstance.get<PaginationResponse<Post>>(
         "/posts",
         {
           params: { page: page },
@@ -91,10 +91,10 @@ function HomePage() {
         <div className="grid grid-cols-3 gap-16">
           {blogs?.data.map((blog) => {
             return (
-              <div key={blog.objectId} className="border border-black p-8">
-                <p className="text-lg font-bold">{blog.title}</p>
+              <div key={blog.slug} className="border border-black p-8">
+                <p className="text-lg font-bold">{blog.slug}</p>
                 <p>{blog.description}</p>
-                <p>{blog.author}</p>
+                <p>{blog.user.name}</p>
               </div>
             );
           })}
