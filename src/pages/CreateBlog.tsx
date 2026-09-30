@@ -46,18 +46,19 @@ function CreateBlog() {
   });
 
   async function onSubmit(data: CreateBlogSchema) {
-    try {
-      setIsLoading(true);
+    setIsLoading(true);
 
+    try {
       // step 1: upload thumbnail ke file service
       const formData = new FormData();
+
       formData.append("file", data.thumbnail);
 
       const fileName = Date.now() + Math.floor(Math.random() * 1000000);
-      const folderName = "Images";
+      const folderName = "images";
 
       const response = await axios.post<ResponseFileService>(
-        `https://finepunishment-us.backendless.app/api/files/${folderName}/${fileName}`,
+        `https://finestpunishment-us.backendless.app/api/files/${folderName}/${fileName}`,
         formData,
       );
 
@@ -66,7 +67,6 @@ function CreateBlog() {
         title: data.title,
         description: data.description,
         category: data.category,
-        userId: 1,
         content: data.content,
         thumbnail: response.data.fileURL,
       });
@@ -80,7 +80,6 @@ function CreateBlog() {
       setIsLoading(false);
     }
   }
-
   return (
     <div>
       <h1>Create Blog</h1>

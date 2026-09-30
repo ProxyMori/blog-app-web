@@ -1,20 +1,28 @@
-interface User {
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+
+interface UserAuth {
+  id: number;
   name: string;
   email: string;
-  objectId: string;
-  token: string;
+  role: string;
+  profilePic: string | null;
+  accessToken: string;
 }
 
-function useAuth() {
-  return {
-    user: null as User | null,
+type Store = {
+  user: UserAuth | null;
+  login: (user: UserAuth) => void;
+  logout: () => void;
+};
 
-    login: (user: User) => {
-      console.log(user);
-    },
-
-    logout: () => {},
-  };
-}
-
-export default useAuth;
+export const useAuth = create<Store>()(
+  persist(
+    (set) => ({
+      user: null,
+      login: (user) => set({ user }),
+      logout: () => set({ user: null }),
+    }),
+    { name: "auth" },
+  ),
+);
