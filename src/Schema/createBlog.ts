@@ -1,12 +1,11 @@
 import { z } from "zod";
 
-export const createBlog = z.object({
-  title: z.string(),
-  description: z.string(),
-  category: z.string(),
-  author: z.string(),
-  content: z.string(),
-  thumbnail: z.instanceof(File),
+export const createPostSchema = z.object({
+  title: z.string().min(3),
+  description: z.string().min(5),
+  category: z.string().min(1),
+  thumbnail: z.string().min(1),
+  content: z.string().min(1),
 });
 
-export type CreateBlog = z.infer<typeof createBlog>;
+export type CreatePostSchema = z.infer<typeof createPostSchema>;
