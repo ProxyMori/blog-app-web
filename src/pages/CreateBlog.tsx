@@ -16,8 +16,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { axiosInstance } from "@/lib/axios";
-import { createBlog, type CreateBlog } from "@/Schema/createBlog";
+import { createBlog, type CreateBlogSchema } from "@/Schema/createBlog";
 import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
@@ -32,38 +33,40 @@ function CreateBlog() {
 
   const navigate = useNavigate();
 
-  const form = useForm<CreateBlog>({
-    resolver: zodResolver(createBlog ),
+  const form = useForm<createBlog>({
+    resolver: zodResolver(createBlog),
     defaultValues: {
       title: "",
       description: "",
       category: "",
-      author: "",
+      userId: "",
       content: "",
       thumbnail: undefined,
     },
   });
 
-  async function onSubmit(data: CreateBlog) {
+  async function onSubmit(data: CreateBlogSchema) {
     try {
       setIsLoading(true);
-      // step 1 : upload thumbnail ke file service
+
+      // step 1: upload thumbnail ke file service
       const formData = new FormData();
       formData.append("file", data.thumbnail);
-      const fileName = Date.now() + Math.floor(Math.random() * 1000);
-      const folderName = "images";
 
-      const response = await axiosInstance.post<ResponseFileService>(
-        `/files/${folderName}/${fileName}`,
+      const fileName = Date.now() + Math.floor(Math.random() * 1000000);
+      const folderName = "Images";
+
+      const response = await axios.post<ResponseFileService>(
+        `https://finepunishment-us.backendless.app/api/files/${folderName}/${fileName}`,
         formData,
       );
 
-      // step 2 : submit data (yang berupa tulisan) ke backendless
-      await axiosInstance.post("/data/Blogs", {
+      // step 2: submit data (yang berupa tulisan) ke backend
+      await axiosInstance.post("/posts", {
         title: data.title,
         description: data.description,
         category: data.category,
-        author: data.author,
+        userId: 1,
         content: data.content,
         thumbnail: response.data.fileURL,
       });
@@ -155,7 +158,7 @@ function CreateBlog() {
               />
 
               <Controller
-                name="author"
+                name=""
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>

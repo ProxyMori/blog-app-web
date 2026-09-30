@@ -1,12 +1,15 @@
 import { z } from "zod";
 
-export const createBlog = z.object({
-  title: z.string(),
-  description: z.string(),
-  category: z.string(),
-  author: z.string(),
-  content: z.string(),
-  thumbnail: z.instanceof(File),
+export const createBlogSchema = z.object({
+  title: z.string().min(5, "Title must be at least 5 characters."),
+  description: z
+    .string()
+    .min(20, "Description must be at least 20 characters."),
+  category: z.string().min(1, "Category is required"),
+  content: z.string().min(1, "Content is required"),
+  thumbnail: z.instanceof(File, {
+    message: "Thumbnail must be a file",
+  }),
 });
 
-export type CreateBlog = z.infer<typeof createBlog>;
+export type CreateBlogSchema = z.infer<typeof createBlogSchema>;
