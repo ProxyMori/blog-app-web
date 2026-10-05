@@ -1,14 +1,15 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
 import "./index.css";
-import RegisterPage from "./pages/RegisterPage";
-import LoginPage from "./pages/LoginPage";
+import { authLoader } from "./loaders/authLoader";
 import BlogDetail from "./pages/BlogDetail";
 import CreateBlog from "./pages/CreateBlog";
-import { authLoader } from "./loaders/authLoader";
 import HomePage from "./pages/HomePage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 
 const router = createBrowserRouter([
   {
@@ -34,8 +35,12 @@ const router = createBrowserRouter([
   },
 ]);
 
+const queryClient = new QueryClient();
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RouterProvider router={router} />,
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />,
+    </QueryClientProvider>
   </StrictMode>,
 );
