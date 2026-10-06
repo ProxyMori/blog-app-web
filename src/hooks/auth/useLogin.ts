@@ -4,6 +4,7 @@ import type { AxiosError } from "axios";
 import { useNavigate } from "react-router";
 import type { LoginSchema } from "@/Schema/login";
 import { axiosInstance } from "@/lib/axios";
+import { toast } from "sonner";
 
 function useLogin() {
   const { login } = useAuth();
@@ -29,13 +30,13 @@ function useLogin() {
         accessToken: data.accessToken,
       });
 
-      alert("Login Success!");
+      toast.success("Login Success!");
 
       navigate("/");
     },
 
     onError: (error: AxiosError<{ message: string }>) => {
-      alert(error.response?.data.message || "Login Failed!");
+      toast.error(error.response?.data.message || "Login Failed!");
     },
   });
 }
