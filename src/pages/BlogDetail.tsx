@@ -1,38 +1,16 @@
 import { Button } from "@/components/ui/button";
-import Loading from "@/components/ui/loading";
-import { axiosInstance } from "@/lib/axios";
-import type { Post } from "@/types/post";
-import { useEffect, useState } from "react";
+import useGetPostBySlug from "@/hooks/api/post/useGetPostBySlug";
 import { Link, useParams } from "react-router-dom";
 
 function BlogDetail() {
   const params = useParams();
 
-  const [blog, setBlog] = useState<Post | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { data: blog, isPending } = useGetPostBySlug(params.slug);
 
-  const getBlog = async () => {
-    try {
-      const { data } = await axiosInstance.get<Post>(
-        `/data/Blogs/${params.slug}`,
-      );
-
-      setBlog(data);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    getBlog();
-  }, []);
-
-  if (isLoading) {
+  if (isPending) {
     return (
       <div>
-        <Loading />
+        <p>Loading...</p>
       </div>
     );
   }
