@@ -37,7 +37,6 @@ function CreateBlog() {
   async function onSubmit(data: CreatePostSchema) {
     mutate(data);
   }
-
   return (
     <div>
       <h1>Create Blog</h1>
