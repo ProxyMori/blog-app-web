@@ -1,67 +1,22 @@
 import { Button } from "@/components/ui/button";
-import Loading from "@/components/ui/loading";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import { axiosInstance } from "@/lib/axios";
-import useAuth from "@/stores/useAuth";
-import type { PaginationResponse } from "@/types/pagination";
-import type { Post } from "@/types/post";
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import GlobalPagination from "@/components/GlobalPagination";
+import useGetPosts from "@/hooks/api/post/useGetPosts";
+import { useAuth } from "@/stores/useAuth";
+import { Link } from "react-router";
+import { useState } from "react";
 
 function HomePage() {
-  const [blogs, setBlogs] = useState<PaginationResponse<Post> | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState<number>(1);
 
   const { user, logout } = useAuth();
 
-  const getBlogs = async () => {
-    try {
-      const { data } = await axiosInstance.get<PaginationResponse<Post>>(
-        "/posts",
-        {
-          params: { page: page },
-        },
-      );
-      setBlogs(data);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  const handlePrev = () => {
-    const currentPage = blogs?.meta.page || 1;
-
-    if (currentPage > 1) {
-      setPage(currentPage - 1);
-    }
-  };
-
-  const handleNext = () => {
-    const currentPage = blogs?.meta.page || 1;
-    const total = blogs?.meta.total || 0;
-    const take = blogs?.meta.take || 0;
-    const totalPage = Math.ceil(total / take);
-
-    if (currentPage < totalPage) {
-      setPage(currentPage + 1);
-    }
-  };
-
-  useEffect(() => {
-    getBlogs();
-  }, [page]);
+  const { data: blogs, isPending } = useGetPosts({
+    page,
+  });
 
   return (
     <div>
+      {/* HEADER */}
       <div className="flex justify-center items-center h-24">
         {user ? (
           <div className="flex items-center gap-4">
@@ -70,6 +25,7 @@ function HomePage() {
             <Button variant="destructive" onClick={logout}>
               Logout
             </Button>
+
             <Link to="/write">
               <Button>Create Blog</Button>
             </Link>
@@ -83,39 +39,41 @@ function HomePage() {
         )}
       </div>
 
-      {isLoading ? (
+      {/* BLOG LIST */}
+      {isPending ? (
         <div className="flex justify-center items-center h-100">
-          <Loading />
+          <div
+            className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-black"
+            role="status"
+            aria-label="Loading"
+          />
         </div>
       ) : (
         <div className="grid grid-cols-3 gap-16">
           {blogs?.data.map((blog) => {
             return (
-              <div key={blog.slug} className="border border-black p-8">
-                <p className="text-lg font-bold">{blog.slug}</p>
-                <p>{blog.description}</p>
-                <p>{blog.user.name}</p>
-              </div>
+              <Link key={blog.id} to={`/blogs/${blog.slug}`}>
+                <div className="border border-black p-8">
+                  <p className="text-lg font-bold">{blog.title}</p>
+
+                  <p>{blog.description}</p>
+
+                  <p>{blog.user.name}</p>
+                </div>
+              </Link>
             );
           })}
         </div>
       )}
 
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem onClick={handlePrev}>
-            <PaginationPrevious />
-          </PaginationItem>
-
-          <PaginationItem>
-            <PaginationLink>{blogs?.meta.page || 1}</PaginationLink>
-          </PaginationItem>
-
-          <PaginationItem onClick={handleNext}>
-            <PaginationNext />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+      {/* PAGINATION */}
+      {blogs?.meta && (
+        <GlobalPagination
+          currentPage={blogs.meta.page}
+          totalPage={Math.ceil(blogs.meta.total / blogs.meta.take)}
+          onChangePage={(page) => setPage(page)}
+        />
+      )}
     </div>
   );
 }

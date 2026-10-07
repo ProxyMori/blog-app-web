@@ -15,70 +15,27 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { axiosInstance } from "@/lib/axios";
-import { createBlog, type CreateBlogSchema } from "@/Schema/createBlog";
+import useCreatePost from "@/hooks/api/post/useCreatePost";
+import { createPostSchema, type CreatePostSchema } from "@/Schema/createBlog";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
-import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useNavigate } from "react-router";
-
-interface ResponseFileService {
-  fileURL: string;
-  filePath: string;
-}
 
 function CreateBlog() {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  const navigate = useNavigate();
-
-  const form = useForm<createBlog>({
-    resolver: zodResolver(createBlog),
+  const form = useForm<CreatePostSchema>({
+    resolver: zodResolver(createPostSchema),
     defaultValues: {
       title: "",
       description: "",
       category: "",
-      userId: "",
       content: "",
       thumbnail: undefined,
     },
   });
 
-  async function onSubmit(data: CreateBlogSchema) {
-    setIsLoading(true);
+  const { mutate, isPending } = useCreatePost();
 
-    try {
-      // step 1: upload thumbnail ke file service
-      const formData = new FormData();
-
-      formData.append("file", data.thumbnail);
-
-      const fileName = Date.now() + Math.floor(Math.random() * 1000000);
-      const folderName = "images";
-
-      const response = await axios.post<ResponseFileService>(
-        `https://finestpunishment-us.backendless.app/api/files/${folderName}/${fileName}`,
-        formData,
-      );
-
-      // step 2: submit data (yang berupa tulisan) ke backend
-      await axiosInstance.post("/posts", {
-        title: data.title,
-        description: data.description,
-        category: data.category,
-        content: data.content,
-        thumbnail: response.data.fileURL,
-      });
-
-      alert("Create blog success");
-
-      navigate("/");
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
-    }
+  async function onSubmit(data: CreatePostSchema) {
+    mutate(data);
   }
   return (
     <div>
@@ -157,7 +114,7 @@ function CreateBlog() {
               />
 
               <Controller
-                name=""
+                name="title"
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
@@ -230,8 +187,8 @@ function CreateBlog() {
             >
               Reset
             </Button>
-            <Button type="submit" form="form-create-blog" disabled={isLoading}>
-              {isLoading ? "Loading" : "Submit"}
+            <Button type="submit" form="form-create-blog" disabled={isPending}>
+              {isPending ? "Loading" : "Submit"}
             </Button>
           </Field>
         </CardFooter>
